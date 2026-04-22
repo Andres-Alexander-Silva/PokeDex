@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PokéDex Pro — Clase 8</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ========== ENCABEZADO ========== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <h1>Poké<span class="accent">DEX</span></h1>
+        <span class="version-badge">v1.0</span>
+      </div>
+      <p class="header-subtitle">Ejercicio Clase 8 — APIs &amp; Fetch</p>
+    </div>
+  </header>
+
+  <!-- ========== BUSCADOR ========== -->
+  <main class="main-content">
+
+    <section class="search-section">
+      <div class="search-box">
+        <label class="search-label" for="pokemon-input">
+          🔍 Busca tu Pokémon
+        </label>
+        <div class="search-row">
+          <input
+            type="text"
+            id="pokemon-input"
+            class="search-input"
+            placeholder="ej: pikachu, charizard, mewtwo..."
+            autocomplete="off"
+          />
+          <button id="btn-buscar" class="btn-primary">
+            <span class="btn-text">BUSCAR</span>
+          </button>
+        </div>
+
+        <!-- Pokémon aleatorio -->
+        <div class="quick-actions">
+          <span class="quick-label">Acciones rápidas:</span>
+          <button class="btn-chip" data-pokemon="pikachu">⚡ Pikachu</button>
+          <button class="btn-chip" data-pokemon="charizard">🔥 Charizard</button>
+          <button class="btn-chip" data-pokemon="mewtwo">🔮 Mewtwo</button>
+          <button class="btn-chip" data-pokemon="eevee">🦊 Eevee</button>
+          <button id="btn-random" class="btn-chip btn-random">🎲 Aleatorio</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TARJETA RESULTADO ========== -->
+    <section id="resultado-section" class="resultado-section hidden">
+
+      <!-- Estado: cargando -->
+      <div id="estado-cargando" class="estado-card hidden">
+        <div class="pokeball-loader">
+          <div class="pokeball">
+            <div class="pokeball-top"></div>
+            <div class="pokeball-center"></div>
+            <div class="pokeball-bottom"></div>
+          </div>
+        </div>
+        <p class="loader-text">Conectando con la PokéAPI...</p>
+      </div>
+
+      <!-- Estado: error -->
+      <div id="estado-error" class="estado-card hidden">
+        <div class="error-icon">✖</div>
+        <h3 class="error-titulo">¡Pokémon no encontrado!</h3>
+        <p class="error-texto" id="error-mensaje">Verifica el nombre e intenta de nuevo.</p>
+      </div>
+
+      <!-- Tarjeta principal del Pokémon -->
+      <div id="pokemon-card" class="pokemon-card hidden">
+
+        <!-- Panel izquierdo -->
+        <div class="card-left">
+          <div class="card-id">#<span id="poke-id">000</span></div>
+          <div class="sprite-frame">
+            <img id="poke-sprite" src="" alt="sprite" class="poke-sprite" />
+            <img id="poke-sprite-shiny" src="" alt="shiny sprite" class="poke-sprite shiny hidden" />
+          </div>
+          <button id="btn-shiny" class="btn-shiny">✨ Ver Shiny</button>
+
+          <!-- Tipos -->
+          <div class="tipos-container">
+            <span class="tipos-label">TIPO</span>
+            <div id="poke-tipos" class="tipos-chips"></div>
+          </div>
+        </div>
+
+        <!-- Panel derecho -->
+        <div class="card-right">
+          <h2 id="poke-nombre" class="poke-nombre"></h2>
+
+          <!-- Stats físicos -->
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-value" id="poke-altura">—</span>
+              <span class="stat-label">Altura</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="poke-peso">—</span>
+              <span class="stat-label">Peso</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="poke-experiencia">—</span>
+              <span class="stat-label">XP Base</span>
+            </div>
+          </div>
+
+          <!-- Habilidades -->
+          <div class="seccion">
+            <h4 class="seccion-titulo">🛡 Habilidades</h4>
+            <div id="poke-habilidades" class="habilidades-list"></div>
+          </div>
+
+          <!-- Estadísticas de combate -->
+          <div class="seccion">
+            <h4 class="seccion-titulo">⚔️ Estadísticas de Combate</h4>
+            <div id="poke-stats-combate" class="stats-bars"></div>
+          </div>
+        </div>
+
+      </div><!-- /pokemon-card -->
+    </section>
+
+    <!-- ========== SECCIÓN DE COMPARACIÓN ========== -->
+    <section class="compare-section">
+      <h3 class="section-heading">⚔️ Modo Comparación</h3>
+      <p class="section-desc">¿Cuál Pokémon es más fuerte? Compara sus stats.</p>
+      <div class="compare-row">
+        <div class="compare-slot" id="slot-a">
+          <p class="slot-placeholder">Busca el Pokémon 1 arriba →<br>luego presiona "Guardar en A"</p>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="compare-slot" id="slot-b">
+          <p class="slot-placeholder">Busca el Pokémon 2 →<br>luego presiona "Guardar en B"</p>
+        </div>
+      </div>
+      <div class="compare-buttons">
+        <button id="btn-guardar-a" class="btn-primary btn-sm" disabled>💾 Guardar en A</button>
+        <button id="btn-guardar-b" class="btn-primary btn-sm" disabled>💾 Guardar en B</button>
+      </div>
+      <div id="compare-resultado" class="compare-resultado hidden"></div>
+    </section>
+
+    <!-- ========== HISTORIAL ========== -->
+    <section class="historial-section">
+      <div class="historial-header">
+        <h3 class="section-heading">📋 Historial de búsquedas</h3>
+        <button id="btn-limpiar" class="btn-ghost">Limpiar</button>
+      </div>
+      <div id="historial-container" class="historial-chips">
+        <p class="historial-empty">Aún no has buscado ningún Pokémon.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <p>Datos obtenidos de <a href="https://pokeapi.co" target="_blank">pokeapi.co</a> — Clase 8: APIs y Fetch 🚀</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
